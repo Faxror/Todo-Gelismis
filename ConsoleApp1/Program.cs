@@ -1,6 +1,7 @@
 ﻿using Business.Model;
 using DataAcces;
 using Entity;
+using Microsoft.EntityFrameworkCore;
 
 while (true)
 {
@@ -11,8 +12,16 @@ while (true)
 
     ConsoleKeyInfo keyInfo = Console.ReadKey();
     string userName = AccountService(keyInfo);
-    ListMainMenu(userName);
-    ProcessUserChoice(keyInfo, userName);
+
+    if (string.IsNullOrEmpty(userName))
+    {
+        Console.WriteLine("Geçersiz giriş bilgileri! Lütfen tekrar deneyin.");
+    }
+    else
+    {
+        ListMainMenu(userName);
+    }
+
 
 }
     
@@ -199,64 +208,128 @@ static async Task ListMainMenu(string kullaniciAdi)
     Console.WriteLine("Liste Sil (2)");
     Console.WriteLine("Liste Düzenle (3)");
     Console.WriteLine("Listeyi Listeleme (4)");
+    Console.WriteLine("Admin İsmi Düzenleme (7)");
+    Console.WriteLine("Admin Hesap Silme (8)");
 
-    ProcessUserChoice(Console.ReadKey(), kullaniciAdi);
+
+    ConsoleKeyInfo keyInfo = Console.ReadKey();
+    ProcessUserChoice(keyInfo, kullaniciAdi);
+   
 }
 
 static string Register()
 {
-    Console.Write("Kullanıcı Adı : ");
-    string KA = Console.ReadLine();
-    Console.Write("Şifre : ");
-    string Sifre = Console.ReadLine();
+    Console.Write("Kullanıcı Adı: ");
+    string kullaniciAdi = Console.ReadLine();
+    Console.Write("Şifre: ");
+    string sifre = Console.ReadLine();
 
     using (var dbContext = new DBContext())
     {
         Users newTodo = new Users
         {
-            Username = KA,
-            Password = Sifre
-
+            Username = kullaniciAdi,
+            Password = sifre
         };
 
         dbContext.Users.Add(newTodo);
         dbContext.SaveChanges();
     }
 
-    return KA;
+    Console.WriteLine("Kayıt başarılı!");
+    return kullaniciAdi;
 }
 
 static string Login()
 {
     Console.Write("Kullanıcı Adı: ");
-    string KA = Console.ReadLine();
+    string kullaniciAdi = Console.ReadLine();
     Console.Write("Şifre: ");
-    string Sifre = Console.ReadLine();
+    string sifre = Console.ReadLine();
 
-    bool basariliGiris = GirisYap(KA, Sifre);
+    bool basariliGiris = GirisYap(kullaniciAdi, sifre);
 
     if (basariliGiris)
     {
-        Console.Clear();
         Console.WriteLine("Başarılı şekilde giriş yapıldı!");
-        return KA;
+        return kullaniciAdi;
     }
     else
     {
-        return "Kullanıcı adı veya şifre hatalı!";
+        Console.WriteLine("Kullanıcı adı veya şifre hatalı!");
+        return null;
+    }
+}
 
+static async Task ChangeToAdminUsernameAndPassword(string kullaniciAdi)
+{
+
+
+    using (var dbContext = new DBContext())
+    {
+
+        var userToEdit = dbContext.Users.FirstOrDefault(u => u.Username == kullaniciAdi);
+
+        if (userToEdit != null)
+        {
+            Console.Write("Yeni Admin İsmini Giriniz: ");
+            string newUsername = Console.ReadLine();
+            userToEdit.Username = newUsername;
+
+            Console.Write("Yeni Admin Şifrenizi Giriniz: ");
+            string newPassword = Console.ReadLine();
+            userToEdit.Password = newPassword;
+
+            dbContext.SaveChangesAsync();
+
+
+        }
     }
 
 }
 
-static bool GirisYap(string kullaniciAdi, string sifre)
+static async Task DeleteToAdminAccount()
 {
+    Console.Write("Lütfen Silinicek Olan Hesabın Adını Giriniz: ");
+    string bk = Console.ReadLine();
+
+
+
     using (var dbContext = new DBContext())
     {
-        // Veritabanında kullanıcının bilgilerini kontrol ediyoruz.
+        Users AdminToDelete = dbContext.Users.FirstOrDefault(t => t.Username == bk);
+
+        if (AdminToDelete != null)
+        {
+            dbContext.Users.Remove(AdminToDelete);
+            dbContext.SaveChangesAsync();
+
+            Console.Write("Başarılı şekilde Silindi.");
+        }
+        else
+        {
+            Console.Write("Elimiz de yok, elimiz de yok, eee elinize vereyim o zaman? - Burak Oyunda.");
+        }
+    }
+}
+
+static bool GirisYap(string kullaniciAdi, string sifre)
+{
+
+    using (var dbContext = new DBContext())
+    {
         bool kullaniciVarMi = dbContext.Users.Any(u => u.Username == kullaniciAdi && u.Password == sifre);
 
-        return kullaniciVarMi;
+        if (kullaniciVarMi)
+        {
+            Console.WriteLine("Başarılı şekilde giriş yapıldı!");
+            return true;
+        }
+        else
+        {
+            Console.WriteLine("Kullanıcı adı veya şifre hatalı!");
+            return false;
+        }
     }
 }
 static void ProcessUserChoice(ConsoleKeyInfo keyInfo, string kullaniciAdi)
@@ -279,6 +352,14 @@ static void ProcessUserChoice(ConsoleKeyInfo keyInfo, string kullaniciAdi)
             Console.Clear();
             ListTodoItems(kullaniciAdi);
             break;
+        case ConsoleKey.D7:
+            Console.Clear();
+            ChangeToAdminUsernameAndPassword(kullaniciAdi);
+            break;
+        case ConsoleKey.D8:
+            Console.Clear();
+            DeleteToAdminAccount();
+            break;
         default:
             Console.WriteLine("Geçersiz seçim!");
             break;
@@ -296,6 +377,6 @@ string AccountService(ConsoleKeyInfo keyInfo)
             Console.Clear();
             return Register();
         default:
-            return "Hata";
+            return null;
     }
 }
