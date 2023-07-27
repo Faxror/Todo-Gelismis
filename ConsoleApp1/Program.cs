@@ -27,8 +27,7 @@ while (true)
 
 
 }
-
-static async Task AddTodoItem(string kullaniciAdi)
+static async Task AddToTodo(string kullaniciAdi)
 {
     Console.Write("Başlık Giriniz: ");
     string bk = Console.ReadLine();
@@ -71,10 +70,9 @@ static async Task AddTodoItem(string kullaniciAdi)
                     {
                         Title = bk,
                         Contents = ik,
-                        Size = buk,
                         AssignedPerson = kullaniciAdi,
                         Montly = categoryName,
-                        RowStatus = false
+                        RowStatus = true
                     };
 
                     dbContext.Tessts.Add(newTodo);
@@ -90,22 +88,25 @@ static async Task AddTodoItem(string kullaniciAdi)
         Console.WriteLine("Geçersiz kategori seçimi! Sadece 1, 2 veya 3 giriniz.");
     }
 }
-
-static async Task DeleteTodoItem()
+static async Task DeleteToTodo()
 {
     Console.Write("Lütfen Silinicek Olan Başlığın İd Giriniz: ");
-    string bk = Console.ReadLine();
+    string titleInput = Console.ReadLine();
 
     using (var dbContext = new DBContext())
     {
-        Test todoToDelete = dbContext.Tessts.FirstOrDefault(t => t.Title == bk);
+   
+        Test todoToDelete = dbContext.Tessts.FirstOrDefault(t => t.Title == titleInput);
 
         if (todoToDelete != null)
         {
-            dbContext.Tessts.Remove(todoToDelete);
-            dbContext.SaveChangesAsync();
+            
+            todoToDelete.RowStatus = false;
 
-            Console.Write("Başarılı şekilde Silindi.");
+            
+            dbContext.SaveChanges();
+
+            Console.Write("Başarılı şekilde değiştirildi.");
         }
         else
         {
@@ -113,8 +114,7 @@ static async Task DeleteTodoItem()
         }
     }
 }
-
-static async Task EditTodoItem(string kullaniciAdi)
+static async Task EditToTodo(string kullaniciAdi)
 {
     Console.Write("Düzenlenecek Olan Başlığın İdsini Giriniz: ");
     string inputId = Console.ReadLine();
@@ -133,13 +133,7 @@ static async Task EditTodoItem(string kullaniciAdi)
 
                 Console.Write("Düzenlenecek Olan İçeriğin Adını Giriniz: ");
                 todoToEdit.Contents = Console.ReadLine();
-
-                Console.Write("Düzenlenecek Olan Büyüklüğü Seçiniz -> XS(1),S(2),M(3),L(4),XL(5) Giriniz: ");
-                string buk = Console.ReadLine();
-                todoToEdit.Size = buk;
-
-              
-
+        
                 Console.Write("Düzenlenecek Olan Günlük/Haftalık/Aylık Seçiniz: ");
                 string inputStatus = Console.ReadLine();
                 todoToEdit.Montly = inputStatus;
@@ -171,8 +165,7 @@ static async Task EditTodoItem(string kullaniciAdi)
         Console.WriteLine("Geçersiz kimlik numarası girişi! Lütfen bir tam sayı giriniz.");
     }
 }
-
-static async Task ListTodoItems(string kullaniciAdi)
+static async Task ListToTodo(string kullaniciAdi)
 {
     using (DBContext dbContext = new DBContext())
     {
@@ -198,7 +191,6 @@ static async Task ListTodoItems(string kullaniciAdi)
         Console.ReadLine();
     }
 }
-
 static async Task ListMainMenu(string kullaniciAdi)
 {
     Console.Clear();
@@ -216,12 +208,11 @@ static async Task ListMainMenu(string kullaniciAdi)
     ProcessUserChoice(keyInfo, kullaniciAdi);
 
 }
-
 static Users Register()
 {
-    Console.Write("Kullanıcı Adı: ");
+    Console.Write("Register Name: ");
     string kullaniciAdi = Console.ReadLine();
-    Console.Write("Şifre: ");
+    Console.Write("Register Password: ");
     string sifre = Console.ReadLine();
 
     using (var dbContext = new DBContext())
@@ -235,20 +226,18 @@ static Users Register()
         dbContext.Users.Add(newTodo);
         dbContext.SaveChanges();
 
-        Console.WriteLine("Kayıt başarılı!");
+        Console.WriteLine("Register is confired!");
         return newTodo;
     }
 }
-
 static Users Login()
 {
-    Console.Write("Kullanıcı Adı: ");
+    Console.Write("Login Name: ");
     string kullaniciAdi = Console.ReadLine();
-    Console.Write("Şifre: ");
+    Console.Write("Login Password: ");
     string sifre = Console.ReadLine();
     return new Users { Username = kullaniciAdi, Password = sifre };
 }
-
 static async Task ChangeToAdminUsernameAndPassword(string kullaniciAdi)
 {
 
@@ -275,7 +264,6 @@ static async Task ChangeToAdminUsernameAndPassword(string kullaniciAdi)
     }
 
 }
-
 static async Task DeleteToAdminAccount()
 {
     Console.Write("Lütfen Silinicek Olan Hesabın Adını Giriniz: ");
@@ -300,7 +288,6 @@ static async Task DeleteToAdminAccount()
         }
     }
 }
-
 static bool GirisYap(string kullaniciAdi, string sifre)
 {
 
@@ -327,19 +314,19 @@ static void ProcessUserChoice(ConsoleKeyInfo keyInfo, string kullaniciAdi)
     {
         case ConsoleKey.D1:
             Console.Clear();
-            AddTodoItem(kullaniciAdi);
+            AddToTodo(kullaniciAdi);
             break;
         case ConsoleKey.D2:
             Console.Clear();
-            DeleteTodoItem();
+            DeleteToTodo();
             break;
         case ConsoleKey.D3:
             Console.Clear();
-            EditTodoItem(kullaniciAdi);
+            EditToTodo(kullaniciAdi);
             break;
         case ConsoleKey.D4:
             Console.Clear();
-            ListTodoItems(kullaniciAdi);
+            ListToTodo(kullaniciAdi);
             break;
         case ConsoleKey.D7:
             Console.Clear();
@@ -354,7 +341,6 @@ static void ProcessUserChoice(ConsoleKeyInfo keyInfo, string kullaniciAdi)
             break;
     }
 }
-
 Users AccountService(ConsoleKeyInfo keyInfo)
 {
     switch (keyInfo.Key)

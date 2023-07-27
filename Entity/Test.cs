@@ -13,7 +13,7 @@ namespace Entity
         public string Contents { get; set; }
 
         public string AssignedPerson { get; set; }
-        public string Size { get; set; }
+       
 
         public string Montly { get; set; }
 
