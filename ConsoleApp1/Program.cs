@@ -39,8 +39,6 @@ static async Task AddTodoItem(string kullaniciAdi)
     Console.Write("Büyüklük Seçiniz -> XS(1),S(2),M(3),L(4),XL(5) Giriniz: ");
     string buk = Console.ReadLine();
 
-    Console.Write("Kişi Seçiniz: ");
-    string kk = Console.ReadLine();
 
     Console.Write("Günlük(1)/Haftalık(2)/Aylık(3) Seçiniz: ");
     string input = Console.ReadLine();
@@ -53,7 +51,7 @@ static async Task AddTodoItem(string kullaniciAdi)
         using (var dbContext = new DBContext())
         {
             // Check if the person (kk) exists in the "users" database
-            var exiduser = dbContext.Users.FirstOrDefault(u => u.Username == kk);
+            var exiduser =  dbContext.Users.FirstOrDefault(u => u.Username == kullaniciAdi);
 
             if (exiduser == null)
             {
@@ -74,7 +72,7 @@ static async Task AddTodoItem(string kullaniciAdi)
                         Title = bk,
                         Contents = ik,
                         Size = buk,
-                        AssignedPerson = kk,
+                        AssignedPerson = kullaniciAdi,
                         Montly = categoryName,
                         RowStatus = false
                     };
@@ -140,9 +138,7 @@ static async Task EditTodoItem(string kullaniciAdi)
                 string buk = Console.ReadLine();
                 todoToEdit.Size = buk;
 
-                Console.Write("Düzenlenecek Olan Kişiyi Seçiniz: ");
-                string assignedPerson = Console.ReadLine();
-                todoToEdit.AssignedPerson = assignedPerson;
+              
 
                 Console.Write("Düzenlenecek Olan Günlük/Haftalık/Aylık Seçiniz: ");
                 string inputStatus = Console.ReadLine();
@@ -151,7 +147,8 @@ static async Task EditTodoItem(string kullaniciAdi)
                 todoToEdit.modifieddate = DateTime.Now;
 
                 // Check if the person (assignedPerson) exists in the "users" database
-                var exiduser = dbContext.Users.FirstOrDefault(u => u.Username == assignedPerson);
+                var exiduser = dbContext.Users.FirstOrDefault(u => u.Username == kullaniciAdi);
+                todoToEdit.AssignedPerson = kullaniciAdi;
 
                 if (exiduser == null)
                 {
