@@ -2,6 +2,7 @@
 using DataAcces;
 using Entity;
 using Microsoft.EntityFrameworkCore;
+using System.Drawing;
 
 while (true)
 {
@@ -11,20 +12,22 @@ while (true)
     Console.WriteLine("Kayıt Ol (6)");
 
     ConsoleKeyInfo keyInfo = Console.ReadKey();
-    string userName = AccountService(keyInfo);
+    Users user = AccountService(keyInfo);
+    bool basariliGiris = GirisYap(user.Username, user.Password);
 
-    if (string.IsNullOrEmpty(userName))
+    if (!basariliGiris)
     {
-        Console.WriteLine("Geçersiz giriş bilgileri! Lütfen tekrar deneyin.");
+        
+       
     }
     else
     {
-        ListMainMenu(userName);
+        ListMainMenu(user.Username);
     }
 
 
 }
-    
+
 static async Task AddTodoItem(string kullaniciAdi)
 {
     Console.Write("Başlık Giriniz: ");
@@ -184,7 +187,7 @@ static async Task ListTodoItems(string kullaniciAdi)
             return;
         }
 
-        List<response>? af = dbContext.Tessts.Where(t => t.RowStatus & t.AssignedPerson == user.Username).Select(c => new response        
+        List<response>? af = dbContext.Tessts.Where(t => t.RowStatus & t.AssignedPerson == user.Username).Select(c => new response
         {
             Title = c.Title,
         }).ToList();
@@ -214,10 +217,10 @@ static async Task ListMainMenu(string kullaniciAdi)
 
     ConsoleKeyInfo keyInfo = Console.ReadKey();
     ProcessUserChoice(keyInfo, kullaniciAdi);
-   
+
 }
 
-static string Register()
+static Users Register()
 {
     Console.Write("Kullanıcı Adı: ");
     string kullaniciAdi = Console.ReadLine();
@@ -234,31 +237,19 @@ static string Register()
 
         dbContext.Users.Add(newTodo);
         dbContext.SaveChanges();
-    }
 
-    Console.WriteLine("Kayıt başarılı!");
-    return kullaniciAdi;
+        Console.WriteLine("Kayıt başarılı!");
+        return newTodo;
+    }
 }
 
-static string Login()
+static Users Login()
 {
     Console.Write("Kullanıcı Adı: ");
     string kullaniciAdi = Console.ReadLine();
     Console.Write("Şifre: ");
     string sifre = Console.ReadLine();
-
-    bool basariliGiris = GirisYap(kullaniciAdi, sifre);
-
-    if (basariliGiris)
-    {
-        Console.WriteLine("Başarılı şekilde giriş yapıldı!");
-        return kullaniciAdi;
-    }
-    else
-    {
-        Console.WriteLine("Kullanıcı adı veya şifre hatalı!");
-        return null;
-    }
+    return new Users { Username = kullaniciAdi, Password = sifre };
 }
 
 static async Task ChangeToAdminUsernameAndPassword(string kullaniciAdi)
@@ -329,6 +320,7 @@ static bool GirisYap(string kullaniciAdi, string sifre)
         {
             Console.WriteLine("Kullanıcı adı veya şifre hatalı!");
             return false;
+            Console.Clear();
         }
     }
 }
@@ -366,7 +358,7 @@ static void ProcessUserChoice(ConsoleKeyInfo keyInfo, string kullaniciAdi)
     }
 }
 
-string AccountService(ConsoleKeyInfo keyInfo)
+Users AccountService(ConsoleKeyInfo keyInfo)
 {
     switch (keyInfo.Key)
     {
