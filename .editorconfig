@@ -1,0 +1,4 @@
+﻿[*.cs]
+
+# IDE0210: Üst düzey deyimlere dönüştür
+dotnet_diagnostic.IDE0210.severity = error
