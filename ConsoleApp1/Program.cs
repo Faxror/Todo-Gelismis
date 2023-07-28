@@ -132,66 +132,58 @@ static async Task DeleteToTodo(string kullaniciAdi)
 }
 static async Task EditToTodo(string kullaniciAdi)
 {
-    Console.Write("Düzenlenecek Olan Başlığın İdsini Giriniz: ");
-    string inputId = Console.ReadLine();
-
-    if (int.TryParse(inputId, out int kimlik))
+    using (var dbContext = new DBContext())
     {
-        using (var dbContext = new DBContext())
+        Console.Write("Düzenlenecek Olan Başlığın Adını Giriniz: ");
+        string inputTitle = Console.ReadLine();
+
+        Test todoToEdit = dbContext.Tessts.FirstOrDefault(t => t.Title == inputTitle);
+
+        if (todoToEdit != null)
         {
-            Test todoToEdit = dbContext.Tessts.FirstOrDefault(t => t.Id == kimlik);
+            Console.Write("Düzenlenecek Olan Başlığın Adını Giriniz: ");
+            string bk = Console.ReadLine();
+            todoToEdit.Title = bk;
 
-            if (todoToEdit != null)
+            Console.Write("Düzenlenecek Olan İçeriğin Adını Giriniz: ");
+            todoToEdit.Contents = Console.ReadLine();
+
+            Console.Write("Düzenlenecek Olan Günlük/Haftalık/Aylık Seçiniz: ");
+            string inputStatus = Console.ReadLine();
+            todoToEdit.Montly = inputStatus;
+
+            Console.Write("Düzenlenecek Olan Yapılıyor/Az kaldı /Bitti Seçiniz: ");
+            string Status = Console.ReadLine();
+            todoToEdit.Status = Status;
+
+            todoToEdit.modifieddate = DateTime.Now;
+
+            // Check if the person (assignedPerson) exists in the "users" database
+            var exiduser = dbContext.Users.FirstOrDefault(u => u.Username == kullaniciAdi);
+            todoToEdit.AssignedPerson = kullaniciAdi;
+
+            if (exiduser == null)
             {
-                Console.Write("Düzenlenecek Olan Başlığın Adını Giriniz: ");
-                string bk = Console.ReadLine();
-                todoToEdit.Title = bk;
-
-                Console.Write("Düzenlenecek Olan İçeriğin Adını Giriniz: ");
-                todoToEdit.Contents = Console.ReadLine();
-        
-                Console.Write("Düzenlenecek Olan Günlük/Haftalık/Aylık Seçiniz: ");
-                string inputStatus = Console.ReadLine();
-                todoToEdit.Montly = inputStatus;
-
-                todoToEdit.modifieddate = DateTime.Now;
-
-                // Check if the person (assignedPerson) exists in the "users" database
-                var exiduser = dbContext.Users.FirstOrDefault(u => u.Username == kullaniciAdi);
-                todoToEdit.AssignedPerson = kullaniciAdi;
-
-                if (exiduser == null)
-                {
-                    Console.WriteLine("Kişi bulunamadı. Değişiklikler kaydedilmedi.");
-
-                }
-                else
-                {
-                    dbContext.SaveChangesAsync();
-                    Console.WriteLine("Başarılı şekilde düzenlendi.");
-                    Console.WriteLine("Devam etmek için bir tuşa basın.");
-                    Console.ReadKey();
-                    ListMainMenu(kullaniciAdi);
-                }
+                Console.WriteLine("Kişi bulunamadı. Değişiklikler kaydedilmedi.");
             }
             else
             {
-                Console.WriteLine("Belirtilen kimlik numarasına sahip todo bulunamadı.");
+                dbContext.SaveChangesAsync();
+                Console.WriteLine("Başarılı şekilde düzenlendi.");
                 Console.WriteLine("Devam etmek için bir tuşa basın.");
                 Console.ReadKey();
                 ListMainMenu(kullaniciAdi);
-
             }
         }
+        else
+        {
+            Console.WriteLine("Belirtilen başlığa sahip todo bulunamadı.");
+            Console.WriteLine("Devam etmek için bir tuşa basın.");
+            Console.ReadKey();
+            ListMainMenu(kullaniciAdi);
+        }
     }
-    else
-    {
-        Console.WriteLine("Geçersiz kimlik numarası girişi! Lütfen bir tam sayı giriniz.");
-        Console.WriteLine("Devam etmek için bir tuşa basın.");
-        Console.ReadKey();
-        ListMainMenu(kullaniciAdi);
 
-    }
 }
 static async Task ListToTodo(string kullaniciAdi)
 {
@@ -205,9 +197,8 @@ static async Task ListToTodo(string kullaniciAdi)
             return;
         }
 
-        // Create separate lists for each status
-        List<response> yapiliyorList = dbContext.Tessts
-            .Where(t => t.RowStatus && t.AssignedPerson == user.Username && t.Status == "Yapılıyor")
+        List<response> tumListe = dbContext.Tessts
+            .Where(t => t.RowStatus && t.AssignedPerson == user.Username)
             .Select(c => new response
             {
                 Title = c.Title,
@@ -215,25 +206,7 @@ static async Task ListToTodo(string kullaniciAdi)
                 Status = c.Status
             }).ToList();
 
-        List<response> azKaldiList = dbContext.Tessts
-            .Where(t => t.RowStatus && t.AssignedPerson == user.Username && t.Status == "Az Kaldı")
-            .Select(c => new response
-            {
-                Title = c.Title,
-                Contents = c.Contents,
-                Status = c.Status
-            }).ToList();
-
-        List<response> bittiList = dbContext.Tessts
-            .Where(t => t.RowStatus && t.AssignedPerson == user.Username && t.Status == "Bitti")
-            .Select(c => new response
-            {
-                Title = c.Title,
-                Contents = c.Contents,
-                Status = c.Status
-            }).ToList();
-
-        if (yapiliyorList.Count == 0 && azKaldiList.Count == 0 && bittiList.Count == 0)
+        if (tumListe.Count == 0)
         {
             Console.WriteLine("Henüz veri yok");
         }
@@ -241,30 +214,21 @@ static async Task ListToTodo(string kullaniciAdi)
         {
             int index = 1;
 
-            // Print items with "Yapılıyor" status
-            foreach (var item in yapiliyorList)
+            foreach (var item in tumListe)
             {
-                Console.WriteLine($"TODO YAPILIYOR Line");
-                Console.WriteLine($"{index}-) Başlık: {item.Title}");
-                Console.WriteLine($"   İçerik: {item.Contents}");
-                Console.WriteLine($"   Durum: {item.Status}");
-                index++;
-            }
+                switch (item.Status)
+                {
+                    case "Yapılıyor":
+                        Console.WriteLine("TODO YAPILIYOR Line");
+                        break;
+                    case "Az Kaldı":
+                        Console.WriteLine("TODO AZ KALDI Line");
+                        break;
+                    case "Bitti":
+                        Console.WriteLine("TODO BİTTİ Line");
+                        break;
+                }
 
-            // Print items with "Az Kaldı" status
-            foreach (var item in azKaldiList)
-            {
-                Console.WriteLine($"TODO AZ KALDI Line");
-                Console.WriteLine($"{index}-) Başlık: {item.Title}");
-                Console.WriteLine($"   İçerik: {item.Contents}");
-                Console.WriteLine($"   Durum: {item.Status}");
-                index++;
-            }
-
-            // Print items with "Bitti" status
-            foreach (var item in bittiList)
-            {
-                Console.WriteLine($"TODO BİTTİ Line");
                 Console.WriteLine($"{index}-) Başlık: {item.Title}");
                 Console.WriteLine($"   İçerik: {item.Contents}");
                 Console.WriteLine($"   Durum: {item.Status}");
@@ -278,85 +242,17 @@ static async Task ListToTodo(string kullaniciAdi)
     }
 
 
-}
 
-static async Task ListToTodoMain(string kullaniciAdi)
-{
-    Console.Write("Başlık Giriniz: ");
-    string bk = Console.ReadLine();
-
-    Console.Write("İçerik Giriniz: ");
-    string ik = Console.ReadLine();
-
-    Console.Write("Günlük(1)/Haftalık(2)/Aylık(3) Seçiniz: ");
-    string input = Console.ReadLine();
-
-    Console.Write("Yapılıyor(3)/Az Kaldı(4)/Bitti(5) Seçiniz: ");
-    string inputtss = Console.ReadLine();
-
-    if (int.TryParse(input, out int selectedCategoryId))
-    {
-        Category selectedCategory = (Category)selectedCategoryId;
-        string categoryName = selectedCategory.ToString();
-
-        using (var dbContext = new DBContext())
-        {
-            // Check if the person (kk) exists in the "users" database
-            var exiduser = dbContext.Users.FirstOrDefault(u => u.Username == kullaniciAdi);
-
-            if (exiduser == null)
-            {
-                Console.WriteLine("Kişi bulunamadı. Kayıt yapılmadı.");
-            }
-            else
-            {
-                Categorys existingCategory = dbContext.Categorys.FirstOrDefault(c => c.Id == selectedCategoryId);
-
-                if (existingCategory == null)
-                {
-                    Console.WriteLine("Geçersiz kategori seçimi!");
-                }
-                else
-                {
-                    Test newTodo = new Test
-                    {
-                        Title = bk,
-                        Contents = ik,
-                        AssignedPerson = kullaniciAdi,
-                        Montly = categoryName,
-                        RowStatus = true,
-                         
-                    };
-
-                    dbContext.Tessts.Add(newTodo);
-                    dbContext.SaveChangesAsync();
-
-                    Console.WriteLine("Başarılı şekilde kaydedildi.");
-
-                    Console.WriteLine("Devam etmek için bir tuşa basın.");
-                    Console.ReadKey();
-                    ListMainMenu(kullaniciAdi);
-                }
-            }
-        }
-    }
-    else
-    {
-        Console.WriteLine("Geçersiz kategori seçimi! Sadece 1, 2 veya 3 giriniz.");
-        Console.WriteLine("Devam etmek için bir tuşa basın.");
-        Console.ReadKey();
-        ListMainMenu(kullaniciAdi);
-    }
 }
 static async Task ListMainMenu(string kullaniciAdi)
 {
     Console.Clear();
 
     Console.WriteLine("Hoşgeldiniz, lütfen yapmak istediğiniz işlemi seçiniz.");
-    Console.WriteLine("Liste Ekle (1)");
-    Console.WriteLine("Liste Sil (2)");
-    Console.WriteLine("Liste Düzenle (3)");
-    Console.WriteLine("Listeyi Listeleme (4)");
+    Console.WriteLine("Todo Ekle (1)");
+    Console.WriteLine("Todo Sil (2)");
+    Console.WriteLine("Todo Düzenle (3)");
+    Console.WriteLine("Todo Listele (4)");
     Console.WriteLine("Admin İsmi Düzenleme (7)");
     Console.WriteLine("Admin Hesap Silme (8)");
 
