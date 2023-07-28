@@ -214,9 +214,12 @@ static async Task ListToTodo(string kullaniciAdi)
         {
             int index = 1;
 
-            foreach (var item in tumListe)
+            // Durumlara göre gruplama yapılıyor
+            var gruplanmisListe = tumListe.GroupBy(item => item.Status);
+
+            foreach (var grup in gruplanmisListe)
             {
-                switch (item.Status)
+                switch (grup.Key)
                 {
                     case "Yapılıyor":
                         Console.WriteLine("TODO YAPILIYOR Line");
@@ -229,10 +232,13 @@ static async Task ListToTodo(string kullaniciAdi)
                         break;
                 }
 
-                Console.WriteLine($"{index}-) Başlık: {item.Title}");
-                Console.WriteLine($"   İçerik: {item.Contents}");
-                Console.WriteLine($"   Durum: {item.Status}");
-                index++;
+                foreach (var item in grup)
+                {
+                    Console.WriteLine($"{index}-) Başlık: {item.Title}");
+                    Console.WriteLine($"   İçerik: {item.Contents}");
+                    Console.WriteLine($"   Durum: {item.Status}");
+                    index++;
+                }
             }
         }
 
@@ -240,6 +246,7 @@ static async Task ListToTodo(string kullaniciAdi)
         Console.ReadKey();
         ListMainMenu(kullaniciAdi);
     }
+
 
 
 
