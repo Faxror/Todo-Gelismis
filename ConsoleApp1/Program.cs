@@ -116,15 +116,15 @@ static async Task DeleteToTodo(string kullaniciAdi)
             
             dbContext.SaveChanges();
 
-            Console.Write("Başarılı şekilde değiştirildi.");
-            Console.WriteLine("Devam etmek için bir tuşa basın.");
+            Console.WriteLine("Başarılı şekilde değiştirildi.");
+            Console.Write("Devam etmek için bir tuşa basın.");
             Console.ReadKey();
             ListMainMenu(kullaniciAdi);
         }
         else
         {
-            Console.Write("Belirtilen başlıkla eşleşen bir todo bulunamadı.");
-            Console.WriteLine("Devam etmek için bir tuşa basın.");
+            Console.WriteLine("Belirtilen başlıkla eşleşen bir todo bulunamadı.");
+            Console.Write("Devam etmek için bir tuşa basın.");
             Console.ReadKey();
             ListMainMenu(kullaniciAdi);
         }
@@ -234,6 +234,7 @@ static async Task ListToTodo(string kullaniciAdi)
 
                 foreach (var item in grup)
                 {
+                    // Aynı başlık altında tüm öğeleri gösteriyoruz
                     Console.WriteLine($"{index}-) Başlık: {item.Title}");
                     Console.WriteLine($"   İçerik: {item.Contents}");
                     Console.WriteLine($"   Durum: {item.Status}");
