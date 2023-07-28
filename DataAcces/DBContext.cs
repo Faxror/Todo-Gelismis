@@ -44,5 +44,6 @@ namespace DataAcces
         public DbSet<Test> Tessts { get; set; }
         public DbSet<Categorys> Categorys { get; set; }
         public DbSet<Users> Users { get; set; }
+        public DbSet<Durum> Durums { get; set; }
     }
 }

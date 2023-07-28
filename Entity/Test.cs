@@ -16,6 +16,7 @@ namespace Entity
        
 
         public string Montly { get; set; }
+        public string Status { get; set; }
 
         public bool RowStatus { get; set; }
 

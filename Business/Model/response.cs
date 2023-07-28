@@ -15,5 +15,6 @@ namespace Business.Model
         public string AssignedPerson { get; set; }
         public string Size { get; set; }
         public string Montly { get; set; }
+        public string Status { get; set; }
     }
 }

@@ -40,6 +40,9 @@ static async Task AddToTodo(string kullaniciAdi)
     Console.Write("Günlük(1)/Haftalık(2)/Aylık(3) Seçiniz: ");
     string input = Console.ReadLine();
 
+    Console.Write("Yapılıyor/Az Kaldı/Bitti Seçiniz: ");
+    string inputtss = Console.ReadLine();
+
     if (int.TryParse(input, out int selectedCategoryId))
     {
         Category selectedCategory = (Category)selectedCategoryId;
@@ -48,7 +51,7 @@ static async Task AddToTodo(string kullaniciAdi)
         using (var dbContext = new DBContext())
         {
             // Check if the person (kk) exists in the "users" database
-            var exiduser =  dbContext.Users.FirstOrDefault(u => u.Username == kullaniciAdi);
+            var exiduser = dbContext.Users.FirstOrDefault(u => u.Username == kullaniciAdi);
 
             if (exiduser == null)
             {
@@ -70,7 +73,9 @@ static async Task AddToTodo(string kullaniciAdi)
                         Contents = ik,
                         AssignedPerson = kullaniciAdi,
                         Montly = categoryName,
-                        RowStatus = true
+                        RowStatus = true,
+                        Status = inputtss
+
                     };
 
                     dbContext.Tessts.Add(newTodo);
@@ -200,26 +205,148 @@ static async Task ListToTodo(string kullaniciAdi)
             return;
         }
 
-        List<response>? af = dbContext.Tessts.Where(t => t.RowStatus & t.AssignedPerson == user.Username).Select(c => new response
-        {
-            Title = c.Title, 
-            Contents = c.Contents
-        }).ToList();
+        // Create separate lists for each status
+        List<response> yapiliyorList = dbContext.Tessts
+            .Where(t => t.RowStatus && t.AssignedPerson == user.Username && t.Status == "Yapılıyor")
+            .Select(c => new response
+            {
+                Title = c.Title,
+                Contents = c.Contents,
+                Status = c.Status
+            }).ToList();
 
-        if (af.Count() == 0)
+        List<response> azKaldiList = dbContext.Tessts
+            .Where(t => t.RowStatus && t.AssignedPerson == user.Username && t.Status == "Az Kaldı")
+            .Select(c => new response
+            {
+                Title = c.Title,
+                Contents = c.Contents,
+                Status = c.Status
+            }).ToList();
+
+        List<response> bittiList = dbContext.Tessts
+            .Where(t => t.RowStatus && t.AssignedPerson == user.Username && t.Status == "Bitti")
+            .Select(c => new response
+            {
+                Title = c.Title,
+                Contents = c.Contents,
+                Status = c.Status
+            }).ToList();
+
+        if (yapiliyorList.Count == 0 && azKaldiList.Count == 0 && bittiList.Count == 0)
+        {
             Console.WriteLine("Henüz veri yok");
-
-        for (int i = 0; i < af.Count; i++)
-        {
-            Console.WriteLine($"{i + 1}-) Başlık: {af[i].Title}");
-            Console.WriteLine($"   İçerik: {af[i].Contents}");
         }
+        else
+        {
+            int index = 1;
+
+            // Print items with "Yapılıyor" status
+            foreach (var item in yapiliyorList)
+            {
+                Console.WriteLine($"TODO YAPILIYOR Line");
+                Console.WriteLine($"{index}-) Başlık: {item.Title}");
+                Console.WriteLine($"   İçerik: {item.Contents}");
+                Console.WriteLine($"   Durum: {item.Status}");
+                index++;
+            }
+
+            // Print items with "Az Kaldı" status
+            foreach (var item in azKaldiList)
+            {
+                Console.WriteLine($"TODO AZ KALDI Line");
+                Console.WriteLine($"{index}-) Başlık: {item.Title}");
+                Console.WriteLine($"   İçerik: {item.Contents}");
+                Console.WriteLine($"   Durum: {item.Status}");
+                index++;
+            }
+
+            // Print items with "Bitti" status
+            foreach (var item in bittiList)
+            {
+                Console.WriteLine($"TODO BİTTİ Line");
+                Console.WriteLine($"{index}-) Başlık: {item.Title}");
+                Console.WriteLine($"   İçerik: {item.Contents}");
+                Console.WriteLine($"   Durum: {item.Status}");
+                index++;
+            }
+        }
+
         Console.WriteLine("Devam etmek için bir tuşa basın.");
         Console.ReadKey();
         ListMainMenu(kullaniciAdi);
     }
 
- 
+
+}
+
+static async Task ListToTodoMain(string kullaniciAdi)
+{
+    Console.Write("Başlık Giriniz: ");
+    string bk = Console.ReadLine();
+
+    Console.Write("İçerik Giriniz: ");
+    string ik = Console.ReadLine();
+
+    Console.Write("Günlük(1)/Haftalık(2)/Aylık(3) Seçiniz: ");
+    string input = Console.ReadLine();
+
+    Console.Write("Yapılıyor(3)/Az Kaldı(4)/Bitti(5) Seçiniz: ");
+    string inputtss = Console.ReadLine();
+
+    if (int.TryParse(input, out int selectedCategoryId))
+    {
+        Category selectedCategory = (Category)selectedCategoryId;
+        string categoryName = selectedCategory.ToString();
+
+        using (var dbContext = new DBContext())
+        {
+            // Check if the person (kk) exists in the "users" database
+            var exiduser = dbContext.Users.FirstOrDefault(u => u.Username == kullaniciAdi);
+
+            if (exiduser == null)
+            {
+                Console.WriteLine("Kişi bulunamadı. Kayıt yapılmadı.");
+            }
+            else
+            {
+                Categorys existingCategory = dbContext.Categorys.FirstOrDefault(c => c.Id == selectedCategoryId);
+
+                if (existingCategory == null)
+                {
+                    Console.WriteLine("Geçersiz kategori seçimi!");
+                }
+                else
+                {
+                    Test newTodo = new Test
+                    {
+                        Title = bk,
+                        Contents = ik,
+                        AssignedPerson = kullaniciAdi,
+                        Montly = categoryName,
+                        RowStatus = true,
+                         
+                    };
+
+                    dbContext.Tessts.Add(newTodo);
+                    dbContext.SaveChangesAsync();
+
+                    Console.WriteLine("Başarılı şekilde kaydedildi.");
+
+                    Console.WriteLine("Devam etmek için bir tuşa basın.");
+                    Console.ReadKey();
+                    ListMainMenu(kullaniciAdi);
+                }
+            }
+        }
+    }
+    else
+    {
+        Console.WriteLine("Geçersiz kategori seçimi! Sadece 1, 2 veya 3 giriniz.");
+        Console.WriteLine("Devam etmek için bir tuşa basın.");
+        Console.ReadKey();
+        ListMainMenu(kullaniciAdi);
+    }
 }
 static async Task ListMainMenu(string kullaniciAdi)
 {
