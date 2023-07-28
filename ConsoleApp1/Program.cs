@@ -17,17 +17,10 @@ while (true)
     Users user = AccountService(keyInfo);
     bool basariliGiris = GirisYap(user.Username, user.Password);
 
-    if (!basariliGiris)
+    if (basariliGiris)
     {
-        
-       
+        ListMainMenu(user.Username);       
     }
-    else
-    {
-        ListMainMenu(user.Username);
-    }
-
-
 }
 static async Task AddToTodo(string kullaniciAdi)
 {
@@ -376,7 +369,7 @@ static async Task DeleteToAdminAccount(string kullaniciAdi)
 }
 static bool GirisYap(string kullaniciAdi, string sifre)
 {
-
+    
     using (var dbContext = new DBContext())
     {
 
@@ -393,7 +386,6 @@ static bool GirisYap(string kullaniciAdi, string sifre)
         {
             Console.WriteLine("Kullanıcı adı veya şifre hatalı!");
             return false;
-            Console.Clear();
         }
     }
 }
