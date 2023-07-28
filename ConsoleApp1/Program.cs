@@ -75,6 +75,10 @@ static async Task AddToTodo(string kullaniciAdi)
                     dbContext.SaveChangesAsync();
 
                     Console.WriteLine("Başarılı şekilde kaydedildi.");
+
+                    Console.WriteLine("Devam etmek için bir tuşa basın.");
+                    Console.ReadKey();
+                    ListMainMenu(kullaniciAdi);
                 }
             }
         }
@@ -82,11 +86,14 @@ static async Task AddToTodo(string kullaniciAdi)
     else
     {
         Console.WriteLine("Geçersiz kategori seçimi! Sadece 1, 2 veya 3 giriniz.");
+        Console.WriteLine("Devam etmek için bir tuşa basın.");
+        Console.ReadKey();
+        ListMainMenu(kullaniciAdi);
     }
 }
-static async Task DeleteToTodo()
+static async Task DeleteToTodo(string kullaniciAdi)
 {
-    Console.Write("Lütfen Silinicek Olan Başlığın İd Giriniz: ");
+    Console.Write("Lütfen Silinicek Olan Başlığın Adını Giriniz: ");
     string titleInput = Console.ReadLine();
 
     using (var dbContext = new DBContext())
@@ -103,10 +110,16 @@ static async Task DeleteToTodo()
             dbContext.SaveChanges();
 
             Console.Write("Başarılı şekilde değiştirildi.");
+            Console.WriteLine("Devam etmek için bir tuşa basın.");
+            Console.ReadKey();
+            ListMainMenu(kullaniciAdi);
         }
         else
         {
             Console.Write("Belirtilen başlıkla eşleşen bir todo bulunamadı.");
+            Console.WriteLine("Devam etmek için bir tuşa basın.");
+            Console.ReadKey();
+            ListMainMenu(kullaniciAdi);
         }
     }
 }
@@ -143,22 +156,34 @@ static async Task EditToTodo(string kullaniciAdi)
                 if (exiduser == null)
                 {
                     Console.WriteLine("Kişi bulunamadı. Değişiklikler kaydedilmedi.");
+
                 }
                 else
                 {
                     dbContext.SaveChangesAsync();
                     Console.WriteLine("Başarılı şekilde düzenlendi.");
+                    Console.WriteLine("Devam etmek için bir tuşa basın.");
+                    Console.ReadKey();
+                    ListMainMenu(kullaniciAdi);
                 }
             }
             else
             {
                 Console.WriteLine("Belirtilen kimlik numarasına sahip todo bulunamadı.");
+                Console.WriteLine("Devam etmek için bir tuşa basın.");
+                Console.ReadKey();
+                ListMainMenu(kullaniciAdi);
+
             }
         }
     }
     else
     {
         Console.WriteLine("Geçersiz kimlik numarası girişi! Lütfen bir tam sayı giriniz.");
+        Console.WriteLine("Devam etmek için bir tuşa basın.");
+        Console.ReadKey();
+        ListMainMenu(kullaniciAdi);
+
     }
 }
 static async Task ListToTodo(string kullaniciAdi)
@@ -187,9 +212,12 @@ static async Task ListToTodo(string kullaniciAdi)
             Console.WriteLine($"{i + 1}-) Başlık: {af[i].Title}");
             Console.WriteLine($"   İçerik: {af[i].Contents}");
         }
+        Console.WriteLine("Devam etmek için bir tuşa basın.");
+        Console.ReadKey();
+        ListMainMenu(kullaniciAdi);
     }
 
-    Console.ReadLine();
+ 
 }
 static async Task ListMainMenu(string kullaniciAdi)
 {
@@ -318,7 +346,7 @@ static void ProcessUserChoice(ConsoleKeyInfo keyInfo, string kullaniciAdi)
             break;
         case ConsoleKey.D2:
             Console.Clear();
-            DeleteToTodo();
+            DeleteToTodo(kullaniciAdi);
             break;
         case ConsoleKey.D3:
             Console.Clear();
