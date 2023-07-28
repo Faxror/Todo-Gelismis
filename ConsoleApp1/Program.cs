@@ -35,10 +35,6 @@ static async Task AddToTodo(string kullaniciAdi)
     Console.Write("İçerik Giriniz: ");
     string ik = Console.ReadLine();
 
-    Console.Write("Büyüklük Seçiniz -> XS(1),S(2),M(3),L(4),XL(5) Giriniz: ");
-    string buk = Console.ReadLine();
-
-
     Console.Write("Günlük(1)/Haftalık(2)/Aylık(3) Seçiniz: ");
     string input = Console.ReadLine();
 
