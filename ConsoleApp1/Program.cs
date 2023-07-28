@@ -3,6 +3,8 @@ using DataAcces;
 using Entity;
 using Microsoft.EntityFrameworkCore;
 using System.Drawing;
+using System.Security.Cryptography;
+using System.Text;
 
 while (true)
 {
@@ -243,12 +245,15 @@ static Users Register()
     Console.Write("Register Password: ");
     string sifre = Console.ReadLine();
 
+
+    string sifrehash = ComputeSHA256Hash(sifre);
+
     using (var dbContext = new DBContext())
     {
         Users newTodo = new Users
         {
             Username = kullaniciAdi,
-            Password = sifre
+            Password = sifrehash
         };
 
         dbContext.Users.Add(newTodo);
@@ -264,7 +269,23 @@ static Users Login()
     string kullaniciAdi = Console.ReadLine();
     Console.Write("Login Password: ");
     string sifre = Console.ReadLine();
+
     return new Users { Username = kullaniciAdi, Password = sifre };
+}
+static string ComputeSHA256Hash(string input)
+{
+    using (SHA256 sha256 = SHA256.Create())
+    {
+        byte[] inputBytes = Encoding.UTF8.GetBytes(input);
+        byte[] hashBytes = sha256.ComputeHash(inputBytes);
+
+        StringBuilder builder = new StringBuilder();
+        for (int i = 0; i < hashBytes.Length; i++)
+        {
+            builder.Append(hashBytes[i].ToString("x2"));
+        }
+        return builder.ToString();
+    }
 }
 static async Task ChangeToAdminUsernameAndPassword(string kullaniciAdi)
 {
@@ -327,7 +348,10 @@ static bool GirisYap(string kullaniciAdi, string sifre)
 
     using (var dbContext = new DBContext())
     {
-        bool kullaniciVarMi = dbContext.Users.Any(u => u.Username == kullaniciAdi && u.Password == sifre);
+
+        string sifrehash = ComputeSHA256Hash(sifre);
+
+        bool kullaniciVarMi = dbContext.Users.Any(u => u.Username == kullaniciAdi && u.Password == sifrehash);
 
         if (kullaniciVarMi)
         {
