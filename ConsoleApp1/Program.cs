@@ -175,17 +175,21 @@ static async Task ListToTodo(string kullaniciAdi)
 
         List<response>? af = dbContext.Tessts.Where(t => t.RowStatus & t.AssignedPerson == user.Username).Select(c => new response
         {
-            Title = c.Title,
+            Title = c.Title, 
+            Contents = c.Contents
         }).ToList();
 
         if (af.Count() == 0)
             Console.WriteLine("Henüz veri yok");
 
-        for (int i = 0; i < af.Count(); i++)
-            Console.WriteLine($"{i}-) {af[i].Title}");
-
-        Console.ReadLine();
+        for (int i = 0; i < af.Count; i++)
+        {
+            Console.WriteLine($"{i + 1}-) Başlık: {af[i].Title}");
+            Console.WriteLine($"   İçerik: {af[i].Contents}");
+        }
     }
+
+    Console.ReadLine();
 }
 static async Task ListMainMenu(string kullaniciAdi)
 {
