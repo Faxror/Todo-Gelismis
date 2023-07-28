@@ -286,13 +286,16 @@ static async Task ChangeToAdminUsernameAndPassword(string kullaniciAdi)
             userToEdit.Password = newPassword;
 
             dbContext.SaveChangesAsync();
-
+            Console.Write("Başarılı Şekilde Değiştirildi. ");
+            Console.WriteLine("Devam etmek için bir tuşa basın.");
+            Console.ReadKey();
+            ListMainMenu(kullaniciAdi);
 
         }
     }
 
 }
-static async Task DeleteToAdminAccount()
+static async Task DeleteToAdminAccount(string kullaniciAdi)
 {
     Console.Write("Lütfen Silinicek Olan Hesabın Adını Giriniz: ");
     string bk = Console.ReadLine();
@@ -309,6 +312,9 @@ static async Task DeleteToAdminAccount()
             dbContext.SaveChangesAsync();
 
             Console.Write("Başarılı şekilde Silindi.");
+            Console.WriteLine("Devam etmek için bir tuşa basın.");
+            Console.ReadKey();
+            ListMainMenu(kullaniciAdi);
         }
         else
         {
@@ -362,7 +368,7 @@ static void ProcessUserChoice(ConsoleKeyInfo keyInfo, string kullaniciAdi)
             break;
         case ConsoleKey.D8:
             Console.Clear();
-            DeleteToAdminAccount();
+            DeleteToAdminAccount(kullaniciAdi);
             break;
         default:
             Console.WriteLine("Geçersiz seçim!");
